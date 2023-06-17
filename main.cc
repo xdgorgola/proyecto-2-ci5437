@@ -13,6 +13,8 @@
 
 using namespace std;
 
+enum Condition {GEQ, GR};
+
 unsigned expanded = 0;
 unsigned generated = 0;
 int tt_threshold = 32; // threshold to save entries in TT
@@ -39,10 +41,120 @@ hash_table_t TTable[2];
 //int maxmin(state_t state, int depth, bool use_tt);
 //int minmax(state_t state, int depth, bool use_tt = false);
 //int maxmin(state_t state, int depth, bool use_tt = false);
-int negamax(state_t state, int depth, int color, bool use_tt = false);
-int negamax(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false);
-int scout(state_t state, int depth, int color, bool use_tt = false);
-int negascout(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false);
+int negamax(state_t state, int depth, int color, bool use_tt = false)
+{
+    std::cout << "Turno: " << color << std::endl;
+    std::cout << "Profundidad " << depth << std::endl;
+    std::cout << state << std::endl;
+    if (depth == 0 || state.terminal()) return color * state.value();
+    int score = std::numeric_limits<int>::min();
+    std::vector<state_t> moves = state.get_valid_moves(color);
+    while (!moves.empty())
+    {
+        state_t c = moves.back(); moves.pop_back();
+        std::cout << "Vamos a hijo con " << (depth - 1) << std::endl;
+        score = max(score, -negamax(c, depth - 1, -color));
+    }
+
+    return score;
+}
+
+
+int negamax(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false)
+{
+    std::cout << state << std::endl;
+    if (depth == 0 || state.terminal()) return color * state.value();
+    int score = std::numeric_limits<int>::min();
+    std::vector<state_t> moves = state.get_valid_moves(color);
+    while(!moves.empty())
+    {
+        state_t c = moves.back(); moves.pop_back();
+        int val = negamax(c, depth - 1, -beta, -alpha, -color);
+        score = max(score, val);
+        alpha = max(alpha, val);
+        if (alpha >= beta) break;
+    }
+
+    return score;
+}
+
+
+bool TEST(state_t state, int depth, int color, int score, Condition cond) 
+{
+    if (depth == 0 || state.terminal()) 
+        return state.value() > score;
+
+    bool isMax = color == 1; // Ver si es 1 o -1
+    std::vector<state_t> moves = state.get_valid_moves(color);
+    for (auto c: moves)
+    {
+        if (isMax && TEST(c, depth - 1, -color, score, Condition::GR))
+            return true;
+        
+        if (!isMax && !TEST(c, depth - 1, -color, score, Condition::GR))
+            return false;
+
+        break;  // simulando el if first.
+    }
+
+    return !isMax;
+}
+
+
+int scout(state_t state, int depth, int color, bool use_tt = false)
+{
+    if (depth == 0 || state.terminal())
+        return state.value();
+
+    int score = 0;
+    bool isMax = color == 1; // Ver si es 1 o -1
+    bool first = true;
+    std::vector<state_t> moves = state.get_valid_moves(color);
+    for(auto c: moves)
+    {
+        if (first)
+        {
+            first = false;
+            score = scout(c, depth -1, -color);
+            continue;
+        }
+
+        if (isMax && TEST(c, depth, -color, score, Condition::GR))
+            score = scout(c, depth - 1, -color);
+        
+        if (!isMax && !TEST(c, depth, -color, score, Condition::GEQ))
+            score = scout(c, depth - 1, -color);
+    }
+    return score;
+}
+
+
+int negascout(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false)
+{
+    if (depth == 0 || state.terminal()) return color * state.value();
+
+    int score = 0;
+    bool first = true;
+    std::vector<state_t> moves = state.get_valid_moves(color);
+    for(auto c: moves)
+    {
+        if (first)
+        {
+            first = false;
+            score = -negascout(c, depth -1, -beta, -alpha, -color);
+        }
+        else
+        {
+            score = -negascout(c, depth - 1, -alpha - 1, -alpha, -color);
+            if (alpha < score && score < beta)
+                score = -negascout(c, depth - 1, -beta, -score, -color);
+        }
+        alpha = max(alpha, score);
+        if (alpha >= beta) break;;
+    }
+    return alpha;
+}
+
 
 int main(int argc, const char **argv) {
     state_t pv[128];
@@ -97,13 +209,13 @@ int main(int argc, const char **argv) {
 
         try {
             if( algorithm == 1 ) {
-                //value = negamax(pv[i], 0, color, use_tt);
+                value = negamax(pv[i], 4, color, use_tt);
             } else if( algorithm == 2 ) {
-                //value = negamax(pv[i], 0, -200, 200, color, use_tt);
+                value = negamax(pv[i], 4, -200, 200, color, use_tt);
             } else if( algorithm == 3 ) {
-                //value = scout(pv[i], 0, color, use_tt);
+                value = scout(pv[i], 4, color, use_tt);
             } else if( algorithm == 4 ) {
-                //value = negascout(pv[i], 0, -200, 200, color, use_tt);
+                value = negascout(pv[i], 4, -200, 200, color, use_tt);
             }
         } catch( const bad_alloc &e ) {
             cout << "size TT[0]: size=" << TTable[0].size() << ", #buckets=" << TTable[0].bucket_count() << endl;
@@ -124,4 +236,3 @@ int main(int argc, const char **argv) {
 
     return 0;
 }
-
