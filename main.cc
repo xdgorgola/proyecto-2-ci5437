@@ -46,7 +46,10 @@ int negamax(state_t state, int depth, int color, bool use_tt = false)
     std::cout << "Turno: " << color << std::endl;
     std::cout << "Profundidad " << depth << std::endl;
     std::cout << state << std::endl;
-    if (depth == 0 || state.terminal()) return color * state.value();
+    if (depth == 0 || state.terminal()){
+      state.print(cout);
+      return color * state.value();
+    } 
     int score = std::numeric_limits<int>::min();
     std::vector<state_t> moves = state.get_valid_moves(color);
     while (!moves.empty())
@@ -103,8 +106,10 @@ bool TEST(state_t state, int depth, int color, int score, Condition cond)
 
 int scout(state_t state, int depth, int color, bool use_tt = false)
 {
-    if (depth == 0 || state.terminal())
-        return state.value();
+    if (depth == 0 || state.terminal()){
+      return state.value();
+    }
+        
 
     int score = 0;
     bool isMax = color == 1; // Ver si es 1 o -1
@@ -156,6 +161,126 @@ int negascout(state_t state, int depth, int alpha, int beta, int color, bool use
 }
 
 
+
+void prueba1(){
+  state_t state;
+  // &
+  int black_moves [] = 
+    {  4, 5, 6, 7, 8, 9 
+    , 10,11,      14,15
+    , 16,17,18,19,20,21
+    , 22,23,24,25,26,27
+    , 28,29,30,31,32,33,34,35
+    };
+  
+  // O
+  int white_moves [] = 
+    {0,1,3, 10,15,17,18,19,25};
+  /*
+
+  Checks if it makes a good decision at depth 1:
+  Right choice: take the right one
+  +------+
+  |&&&&&&|
+  |O&..&O|
+  |&OOO&&|
+  |&&&O&&|
+  |&&&&&&|
+  |&&&&&&|
+  +------+
+
+  Right choice:
+  +------+
+  |&&&&&&|
+  |OOOOOO|
+  |&O&&&&|
+  |&&&&&&|
+  |&&&&&&|
+  |&&&&&&|
+  +------+
+
+  Left choice:
+  +------+
+  |&&&&&&|
+  |OOOOOO|
+  |&&&O&&|
+  |&&&O&&|
+  |&&&&&&|
+  |&&&&&&|
+  +------+
+  */
+  bool black = 2 % 2 == 0; // black moves first!
+  bool white = 2 % 2 != 0; // black moves first!
+  for (int i=0; i < 30; i++){
+    state.set_color(black, black_moves[i]);
+  }
+
+  for (int i=0; i < 6; i++){
+    state.set_color(white, white_moves[i]);
+  }
+  
+  cout << state << endl;
+
+  cout << negamax(state,5,black) << endl;
+  cout << scout(state,5,black) << endl;
+  cout << negascout(state, 5, -200, 200, black);
+}
+
+
+void prueba2(){
+
+  /*
+  Checks if it makes a good decision at depth 2
+  +------+
+  |&&&O&.|
+  |O&..O&|
+  |&&OO&&|
+  |&O&O&&|
+  |&O&&&&|
+  |&&&.&&|
+  +------+
+
+  Possible optimal?
+  +------+
+  |&&&O&&|
+  |OOOO&&|
+  |&&&&&&|
+  |&O&O&&|
+  |&O&O&&|
+  |&&&O&&|
+  +------+
+  */
+  state_t state;
+  // &
+  int black_moves [] = 
+    {  4, 5, 6, 8, 11, 15
+    , 16,17, 18,19,20,21
+    , 22,23,24,25,26,27
+    , 28,29,30,31,32,34,35
+    };
+  
+  // O
+  int white_moves [] = 
+    {7,10,14,0,1,3,21,25};
+
+  
+
+  bool black = 2 % 2 == 0; // black moves first!
+  bool white = 2 % 2 != 0; // black moves first!
+  for (int i=0; i < 25; i++){
+    state.set_color(black, black_moves[i]);
+  }
+
+  for (int i=0; i < 8; i++){
+    state.set_color(white, white_moves[i]);
+  }
+  
+  cout << state << endl;
+  cout << negamax(state,5,black) << endl;
+  cout << scout(state,5,black) << endl;
+  cout << negascout(state, 5, -200, 200, black);
+}
+
 int main(int argc, const char **argv) {
     state_t pv[128];
     int npv = 0;
@@ -177,10 +302,18 @@ int main(int argc, const char **argv) {
     pv[0] = state;
     cout << "done!" << endl;
 
-#if 0
+#if 1
+    prueba2();
+
     // print principal variation
-    for( int i = 0; i <= npv; ++i )
-        cout << pv[npv - i];
+    /* for( int i = 0; i <= npv; ++i ){
+      cout << pv[npv - i] << endl;
+      pv[npv - i].print_bits(cout);
+      cout << endl;
+    } */
+
+    return 0;
+        
 #endif
 
     // Print name of algorithm
@@ -236,3 +369,4 @@ int main(int argc, const char **argv) {
 
     return 0;
 }
+
