@@ -46,19 +46,16 @@ int negamax(state_t state, int depth, int color, bool use_tt = false)
     std::cout << "Turno: " << color << std::endl;
     std::cout << "Profundidad " << depth << std::endl;
     std::cout << state << std::endl;
-    if (depth == 0 || state.terminal()){
-      state.print(cout);
+    if (depth == 0 || state.terminal())
       return color * state.value();
-    } 
+
     int score = std::numeric_limits<int>::min();
     std::vector<state_t> moves = state.get_valid_moves(color);
-    while (!moves.empty())
+    for (auto c: moves)
     {
-        state_t c = moves.back(); moves.pop_back();
         std::cout << "Vamos a hijo con " << (depth - 1) << std::endl;
         score = max(score, -negamax(c, depth - 1, -color));
     }
-
     return score;
 }
 
@@ -69,15 +66,13 @@ int negamax(state_t state, int depth, int alpha, int beta, int color, bool use_t
     if (depth == 0 || state.terminal()) return color * state.value();
     int score = std::numeric_limits<int>::min();
     std::vector<state_t> moves = state.get_valid_moves(color);
-    while(!moves.empty())
+    for (auto c: moves) 
     {
-        state_t c = moves.back(); moves.pop_back();
-        int val = negamax(c, depth - 1, -beta, -alpha, -color);
+        int val = -negamax(c, depth - 1, -beta, -alpha, -color);
         score = max(score, val);
         alpha = max(alpha, val);
         if (alpha >= beta) break;
     }
-
     return score;
 }
 
@@ -110,7 +105,6 @@ int scout(state_t state, int depth, int color, bool use_tt = false)
       return state.value();
     }
         
-
     int score = 0;
     bool isMax = color == 1; // Ver si es 1 o -1
     bool first = true;
@@ -303,17 +297,12 @@ int main(int argc, const char **argv) {
     cout << "done!" << endl;
 
 #if 1
-    prueba2();
-
     // print principal variation
-    /* for( int i = 0; i <= npv; ++i ){
+    for( int i = 0; i <= npv; ++i ){
       cout << pv[npv - i] << endl;
       pv[npv - i].print_bits(cout);
       cout << endl;
-    } */
-
-    return 0;
-        
+    }       
 #endif
 
     // Print name of algorithm
