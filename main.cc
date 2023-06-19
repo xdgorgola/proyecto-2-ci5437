@@ -43,9 +43,9 @@ hash_table_t TTable[2];
 //int maxmin(state_t state, int depth, bool use_tt = false);
 int negamax(state_t state, int depth, int color, bool use_tt = false)
 {
-    std::cout << "Turno: " << color << std::endl;
+    /* std::cout << "Turno: " << color << std::endl;
     std::cout << "Profundidad " << depth << std::endl;
-    std::cout << state << std::endl;
+    std::cout << state << std::endl; */
     if (depth == 0 || state.terminal())
       return color * state.value();
 
@@ -53,7 +53,7 @@ int negamax(state_t state, int depth, int color, bool use_tt = false)
     std::vector<state_t> moves = state.get_valid_moves(color);
     for (auto c: moves)
     {
-        std::cout << "Vamos a hijo con " << (depth - 1) << std::endl;
+        /* std::cout << "Vamos a hijo con " << (depth - 1) << std::endl; */
         score = max(score, -negamax(c, depth - 1, -color));
     }
     return score;
@@ -62,7 +62,7 @@ int negamax(state_t state, int depth, int color, bool use_tt = false)
 
 int negamax(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false)
 {
-    std::cout << state << std::endl;
+    /* std::cout << state << std::endl; */
     if (depth == 0 || state.terminal()) return color * state.value();
     int score = std::numeric_limits<int>::min();
     std::vector<state_t> moves = state.get_valid_moves(color);
@@ -92,7 +92,7 @@ bool TEST(state_t state, int depth, int color, int score, Condition cond)
         if (!isMax && !TEST(c, depth - 1, -color, score, Condition::GR))
             return false;
 
-        break;  // simulando el if first.
+        //break;  // simulando el if first.
     }
 
     return !isMax;
@@ -296,7 +296,7 @@ int main(int argc, const char **argv) {
     pv[0] = state;
     cout << "done!" << endl;
 
-#if 1
+#if 0
     // print principal variation
     for( int i = 0; i <= npv; ++i ){
       cout << pv[npv - i] << endl;
