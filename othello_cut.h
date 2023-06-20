@@ -213,7 +213,7 @@ inline bool state_t::outflank(bool color, int pos) const {
         for( p = x + 1; (*p != -1) && !is_free(*p) && (color ^ is_black(*p)); ++p );
         if( (p > x + 1) && (*p != -1) && !is_free(*p) ) return true;
     }
-    if( x != cols[pos - 4] ) {
+    if( x != dia1[pos - 4] ) {
         for( p = x - 1; (p >= dia1[pos - 4]) && !is_free(*p) && (color ^ is_black(*p)); --p );
         if( (p < x - 1) && (p >= dia1[pos - 4]) && !is_free(*p) ) return true;
     }
@@ -224,7 +224,7 @@ inline bool state_t::outflank(bool color, int pos) const {
         for( p = x + 1; (*p != -1) && !is_free(*p) && (color ^ is_black(*p)); ++p );
         if( (p > x + 1) && (*p != -1) && !is_free(*p) ) return true;
     }
-    if( x != cols[pos - 4] ) {
+    if( x != dia2[pos - 4] ) {
         for( p = x - 1; (p >= dia2[pos - 4]) && !is_free(*p) && (color ^ is_black(*p)); --p );
         if( (p < x - 1) && (p >= dia2[pos - 4]) && !is_free(*p) ) return true;
     }
