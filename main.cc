@@ -50,14 +50,14 @@ int negamax(state_t state, int depth, int color, bool use_tt = false)
       return color * state.value();
 
     int score = std::numeric_limits<int>::min();
-    std::vector<state_t> moves = state.get_valid_moves(color);
+    std::vector<state_t> moves = state.get_valid_moves(color == 1);
     for (auto c: moves)
     {
         generated++;
         /* std::cout << "Vamos a hijo con " << (depth - 1) << std::endl; */
         score = max(score, -negamax(c, depth - 1, -color));
-        expanded++;
     }
+    expanded++;
     return score;
 }
 
@@ -67,16 +67,16 @@ int negamax(state_t state, int depth, int alpha, int beta, int color, bool use_t
     /* std::cout << state << std::endl; */
     if (depth == 0 || state.terminal()) return color * state.value();
     int score = std::numeric_limits<int>::min();
-    std::vector<state_t> moves = state.get_valid_moves(color);
+    std::vector<state_t> moves = state.get_valid_moves(color == 1);
     for (auto c: moves) 
     {
         generated++;
         int val = -negamax(c, depth - 1, -beta, -alpha, -color);
         score = max(score, val);
         alpha = max(alpha, val);
-        expanded++;
         if (alpha >= beta) break;
     }
+    expanded++;
     return score;
 }
 
@@ -87,7 +87,7 @@ bool TEST(state_t state, int depth, int color, int score, Condition cond)
         return state.value() > score;
 
     bool isMax = color == 1; // Ver si es 1 o -1
-    std::vector<state_t> moves = state.get_valid_moves(color);
+    std::vector<state_t> moves = state.get_valid_moves(color == 1);
     for (auto c: moves)
     {
         if (isMax && TEST(c, depth - 1, -color, score, Condition::GR))
@@ -112,7 +112,7 @@ int scout(state_t state, int depth, int color, bool use_tt = false)
     int score = 0;
     bool isMax = color == 1; // Ver si es 1 o -1
     bool first = true;
-    std::vector<state_t> moves = state.get_valid_moves(color);
+    std::vector<state_t> moves = state.get_valid_moves(color == 1);
     for(auto c: moves)
     {
         generated++;
@@ -128,8 +128,8 @@ int scout(state_t state, int depth, int color, bool use_tt = false)
         
         if (!isMax && !TEST(c, depth, -color, score, Condition::GEQ))
             score = scout(c, depth - 1, -color);
-        expanded++;
     }
+    expanded++;
     return score;
 }
 
@@ -140,7 +140,7 @@ int negascout(state_t state, int depth, int alpha, int beta, int color, bool use
 
     int score = 0;
     bool first = true;
-    std::vector<state_t> moves = state.get_valid_moves(color);
+    std::vector<state_t> moves = state.get_valid_moves(color == 1);
     for(auto c: moves)
     {
         generated++;
@@ -156,9 +156,9 @@ int negascout(state_t state, int depth, int alpha, int beta, int color, bool use
                 score = -negascout(c, depth - 1, -beta, -score, -color);
         }
         alpha = max(alpha, score);
-        expanded++;
         if (alpha >= beta) break;
     }
+    expanded++;
     return alpha;
 }
 
