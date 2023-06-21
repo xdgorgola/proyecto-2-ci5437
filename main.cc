@@ -90,6 +90,7 @@ bool TEST(state_t state, int depth, int color, int score, Condition cond)
     std::vector<state_t> moves = state.get_valid_moves(color == 1);
     for (auto c: moves)
     {
+        generated++;
         if (isMax && TEST(c, depth - 1, -color, score, Condition::GR))
             return true;
         
@@ -98,6 +99,7 @@ bool TEST(state_t state, int depth, int color, int score, Condition cond)
 
         //break;  // simulando el if first.
     }
+    expanded++;
 
     return !isMax;
 }
@@ -339,13 +341,13 @@ int main(int argc, const char **argv) {
 
         try {
             if( algorithm == 1 ) {
-                value = negamax(pv[i], 4, color, use_tt);
+                value = negamax(pv[i], 34, color, use_tt);
             } else if( algorithm == 2 ) {
-                value = negamax(pv[i], 4, -200, 200, color, use_tt);
+                value = negamax(pv[i], 34, -200, 200, color, use_tt);
             } else if( algorithm == 3 ) {
-                value = scout(pv[i], 4, color, use_tt);
+                value = scout(pv[i], 34, color, use_tt);
             } else if( algorithm == 4 ) {
-                value = negascout(pv[i], 4, -200, 200, color, use_tt);
+                value = negascout(pv[i], 34, -200, 200, color, use_tt);
             }
         } catch( const bad_alloc &e ) {
             cout << "size TT[0]: size=" << TTable[0].size() << ", #buckets=" << TTable[0].bucket_count() << endl;
